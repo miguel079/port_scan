@@ -1,0 +1,75 @@
+import socket
+
+import ipaddress
+
+import re
+# Regular Expression Pattern to extract the number of ports you want to scan. 
+# You have to specify <lowest_port_number>-<highest_port_number> (ex 10-100)
+
+port_range_pattern = re.compile("([0-9]+)-([0-9]+)")
+# Initialising the port numbers, will be using the variables later on.
+port_min = 0
+port_max = 65535
+
+
+
+#Basic User interface header
+############
+print(r"""
+  __  __             ____     _   _U _____ u _      
+U|' \/ '|u  ___   U /"___|uU |"|u| \| ___"|/|"|     
+\| |\/| |/ |_"_|  \| |  _ / \| |\| ||  _|"U | | u   
+ | |  | |   | |    | |_| |   | |_| || |___ \| |/__  
+ |_|  |_| U/| |\u   \____|  <<\___/ |_____| |_____| 
+<<,-,,-.-,_|___|_,-._)(|_  (__) )(  <<   >> //  \\  
+ (./  \.)_)-' '-(_/(__)__)     (__)(__) (__|_")("_) """)
+
+open_ports = []
+
+while True:
+    ip_add_entered = input("Enter IP Address: ")
+    try:
+      ip_address_obj = ipaddress.ipaddress(ip_add_entered)
+      # The following line will only execute if the ip is valid.
+      print ("IP Address Valid")
+      break
+    except:
+      print("This is not a valid IP Address.")
+
+while True:
+   # You can scan 0-65535 ports. This scanner is basic and doesn't use multithreading so scanning all
+    # the ports is not advised.
+  print("Please enter the range of ports you want to scan in the format: <int>-<int> (i.e 60-120")
+  port_range = input("Enter port range: ")
+   # We pass the port numbers in by removing extra spaces that people sometimes enter. 
+  # So if you enter 80 - 90 instead of 80-90 the program will still work.
+  port_range_valid = port_range_pattern.search(port_range.replace(" ", ""))
+  if port_range_valid:
+    port_min = int(port_range_valid.group(1))
+    port_max = int(port_range_valid.group(2))
+    break
+    
+
+#basic socket port scanning    
+for port in range (port_min, port_max + 1):
+  #connect to socket of machine, need IP address and port number
+  try: 
+    #create socket object
+    
+    #Can create a socket connection similar to opening a file in python
+    #Can change code to allow for domain names
+    #With socket.AF_INET, we can enter either a domain or IP address
+    #and it will continue with the connection
+      with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.5)
+        # We use the socket object we created to connect to the ip address we entered and the port number. 
+            # If it can't connect to this socket it will cause an exception and the open_ports list will not 
+            # append the value.
+        s.connect((ip_add_entered, port))
+        open_ports.append(port)
+
+  except:
+      pass
+
+for port in open_ports:
+  print(f"Port {port} is open on {ip_add_entered}).")
